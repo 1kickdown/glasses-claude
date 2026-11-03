@@ -34,7 +34,7 @@ export default function App() {
         <div className="title">Введите токен доступа</div>
         <input
           className="field"
-          type="password"
+          type="text"
           placeholder="Токен"
           onChange={(e) => {
             const v = e.target.value.trim()
