@@ -6,7 +6,19 @@ import { speak, stopSpeaking } from './lib/speech.ts'
 const ERRORS = { auth: 'Неверный токен', rate: 'Слишком часто', network: 'Нет связи', server: 'Ошибка сервера' }
 
 export default function App() {
-  const [token, setToken] = useState<string | null>(() => store.get('token'))
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      const u = new URL(window.location.href)
+      const t = u.searchParams.get('t')
+      if (t) {
+        store.set('token', t)
+        u.searchParams.delete('t')
+        window.history.replaceState(null, '', u.pathname + u.search + u.hash)
+        return t
+      }
+    } catch { /* ignore */ }
+    return store.get('token') || null
+  })
   const [messages, setMessages] = useState<Msg[]>([])
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
