@@ -25,8 +25,19 @@ export default function App() {
   const [error, setError] = useState('')
   const [voice, setVoice] = useState(() => store.get('voice') !== 'off')
   const endRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const lock = useRef(false)
+  const submitRef = useRef<(v: string) => void>(() => {})
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }) }, [messages, busy, error])
+
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    const onChange = () => submitRef.current(el.value)
+    el.addEventListener('change', onChange)
+    return () => el.removeEventListener('change', onChange)
+  }, [token])
 
   if (!token) {
     return (
@@ -47,7 +58,8 @@ export default function App() {
 
   async function submit(value: string, history: Msg[] = messages) {
     const q = value.trim()
-    if (!q || busy) return
+    if (!q || busy || lock.current) return
+    lock.current = true
     const next: Msg[] = [...history, { role: 'user', content: q }]
     setMessages(next)
     setText('')
@@ -64,8 +76,11 @@ export default function App() {
       setError(ERRORS[kind])
     } finally {
       setBusy(false)
+      lock.current = false
     }
   }
+
+  submitRef.current = (v: string) => { submit(v) }
 
   return (
     <div className="screen">
@@ -82,14 +97,15 @@ export default function App() {
       </main>
       <footer className="compose">
         <input
+          ref={inputRef}
           className="field"
           value={text}
           placeholder="Спросите Claude"
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') submit(text) }}
-          onBlur={() => { if (text.trim()) submit(text) }}
         />
         <div className="row">
+          <button onClick={() => submit(text)}>Отправить</button>
           <button onClick={() => { stopSpeaking(); setMessages([]); setError('') }}>+ New</button>
           <button onClick={() => { const v = !voice; setVoice(v); store.set('voice', v ? 'on' : 'off'); if (!v) stopSpeaking() }}>
             Voice {voice ? 'on' : 'off'}
