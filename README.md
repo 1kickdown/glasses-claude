@@ -89,6 +89,4 @@ Extra environment variables: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_VE
 - Never commit `.env` files, API keys or tokens (they are git-ignored here).
 - Keep your Anthropic spend limit low and rotate `ACCESS_TOKEN` if the URL leaks.
 
-## License
 
-No license has been chosen yet. Add a `LICENSE` file (for example MIT) if you want others to reuse the code.
